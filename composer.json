@@ -1,0 +1,11 @@
+{
+    "name": "islandora/gearman-worker",
+    "description": "A script for starting gearman workers",
+    "type": "project",
+    "license": "GPL",
+    "require": {
+        "nategood/commando": "^0.2.9",
+        "react/child-process": "^0.4.3",
+        "react/stream": "^0.5"
+    }
+}
