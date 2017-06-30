@@ -5,7 +5,6 @@ require __DIR__ . '/../vendor/autoload.php';
 use \Commando\Command;
 use \React\EventLoop\Factory as EventFactory;
 use \React\ChildProcess\Process;
-use \React\Stream\Stream;
 
 // Parse command line options.
 $cmd = new Command();
@@ -19,8 +18,6 @@ $cmd->option('drush')
 $cmd->parse();
 
 $loop = EventFactory::create();
-$stdout = new Stream(STDOUT, $loop);
-$stderr = new Stream(STDERR, $loop);
 
 // Get input data
 $input_data = stream_get_contents(STDIN);
@@ -46,8 +43,15 @@ else {
 // Run drush process
 $drush = new Process("${cmd['drush']} --root=${cmd['root']} $site -u $uid islandora-job-router");
 $drush->start($loop);
-$drush->stdout->pipe($stdout);
-$drush->stderr->pipe($stderr);
+
+$drush->stdout->on('data', function ($chunk) {
+  fwrite(STDOUT, $chunk);
+});
+
+$drush->stderr->on('data', function ($chunk) {
+  fwrite(STDERR, $chunk);
+});
+
 $drush->stdin->write($input_data);
 $drush->stdin->end();
 $loop->run();
